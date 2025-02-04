@@ -1,0 +1,10 @@
+listen: 8081
+dsn: postgres://postgres:postgres@127.0.0.1:5432/database
+tgSecret: xxxxxx
+providers:
+  - name: local
+    endpoint: 127.0.0.1:8080
+    secret: xxxxxx
+  - name: chatgpt
+    endpoint: api.chatgpt.com
+    secret: xxxxxx
