@@ -23,6 +23,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   llama:
     image: ghcr.io/ggerganov/llama.cpp:server
@@ -31,6 +37,29 @@ services:
       - ./llm/models:/models
     ports:
       - 8000:8000
+
+  ya-boo-migrate:
+    environment:
+      BOO_DSN: postgres://postgres:postgres@db:5432/praktikum?sslmode=disable
+    build:
+      target: ya-boo
+    command: '/app/ya-boo migrate -c /app/config.yaml'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  ya-boo:
+    environment:
+      BOO_DSN: postgres://postgres:postgres@db:5432/praktikum?sslmode=disable
+    env_file: .env
+    build:
+      target: ya-boo
+    command: '/app/ya-boo run -c /app/config.yaml'
+    depends_on:
+      ya-boo-migrate:
+        condition: service_completed_successfully
+      llama:
+        condition: service_started
 
 volumes:
   pgdata:

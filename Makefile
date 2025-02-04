@@ -13,3 +13,11 @@ lint:
 .PHONY: statictest
 statictest:
 	go vet -vettool=$(which statictest) ./...
+
+.PHONY: up
+up:
+	podman compose up -d
+
+.PHONY: down
+down:
+	podman compose down
