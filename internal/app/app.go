@@ -1,11 +1,22 @@
 package app
 
-import "github.com/sejo412/ya-boo/pkg/config"
+import (
+	"log"
 
-type app struct {
-	cfg *config.Config
+	"github.com/sejo412/ya-boo/pkg/config"
+)
+
+type App struct {
+	Cfg *config.Config
 }
 
-func newApp(cfg *config.Config) *app {
-	return &app{cfg}
+func NewApp(cfg *config.Config) *App {
+	return &App{cfg}
+}
+
+func (a *App) Run() error {
+	log.Println("starting server")
+
+	log.Printf("config: %#v\n", a.Cfg)
+	return nil
 }

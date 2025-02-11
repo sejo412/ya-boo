@@ -24,3 +24,5 @@ vendor/
 
 # LLM models
 llm/models
+
+/ya-boo
