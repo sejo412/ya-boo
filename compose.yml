@@ -1,0 +1,36 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: praktikum
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  llama:
+    image: ghcr.io/ggerganov/llama.cpp:server
+    command: '-m /models/dev-model.gguf --port 8000 --host 0.0.0.0 --ctx-size 100'
+    volumes:
+      - ./llm/models:/models
+    ports:
+      - 8000:8000
+
+volumes:
+  pgdata:
