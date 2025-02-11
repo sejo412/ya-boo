@@ -1,4 +1,4 @@
-listen: 8081
+port: 8081
 dsn: postgres://postgres:postgres@127.0.0.1:5432/database
 tgSecret: xxxxxx
 providers:
