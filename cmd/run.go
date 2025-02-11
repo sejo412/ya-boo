@@ -32,6 +32,6 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	runCmd.Flags().StringP("config", "c", "", "config file path")
-	runCmd.Flags().IntP("port", "p", 8080, "http server port")
+	runCmd.Flags().IntP("port", "p", defaultPort, "http server port")
 	runCmd.Flags().StringP("dsn", "d", "", "database connection string")
 }

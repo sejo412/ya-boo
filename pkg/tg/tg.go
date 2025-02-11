@@ -3,6 +3,7 @@ package tg
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -26,9 +27,12 @@ func NewBot(token string) (*Bot, error) {
 
 func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
+		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   fmt.Sprintf("echo: %s", update.Message.Text),
 		})
+		if err != nil {
+			log.Printf("error sending message: %v", err)
+		}
 	}
 }

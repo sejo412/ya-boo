@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -o ya-boo
+  docker:build:
+    vars:
+      BUILDER: $(which docker || which podman || which buildah)
+    cmds:
+      - eval {{.BUILDER}} build -t ya-boo:dev .
+  lint:
+    desc: Run linters using golangci-lint
+    cmds:
+      - golangci-lint run --config .golangci.yml
+    silent: true
+  statictest:
+    cmds:
+      - go vet -vettool=$(which statictest) ./...

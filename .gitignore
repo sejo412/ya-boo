@@ -26,3 +26,4 @@ vendor/
 llm/models
 
 /ya-boo
+/.env
