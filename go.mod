@@ -3,6 +3,7 @@ module github.com/sejo412/ya-boo
 go 1.22.6
 
 require (
+	github.com/go-telegram/bot v1.13.3
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 )
