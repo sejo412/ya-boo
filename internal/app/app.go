@@ -2,9 +2,7 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"time"
 
 	"github.com/go-telegram/bot"
 	"github.com/sejo412/ya-boo/pkg/ai"
@@ -32,15 +30,5 @@ func (a *App) Run() error {
 	localAi := ai.NewClient("http://127.0.0.1:8000", "")
 	a.aiClients["local"] = localAi
 
-	go func() {
-		if err := a.StartTelegramBot(ctxTg, a.cfg.TgSecret); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	fmt.Println("Bot started")
-
-	time.Sleep(60 * time.Minute)
-
-	return nil
+	return a.StartTelegramBot(ctxTg, a.cfg.TgSecret)
 }
