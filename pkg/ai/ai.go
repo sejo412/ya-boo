@@ -7,20 +7,20 @@ import (
 	"github.com/openai/openai-go/option"
 )
 
-type AI struct {
+type Client struct {
 	*openai.Client
 }
 
-func NewAI(endpoint, token string) *AI {
+func NewClient(endpoint, token string) *Client {
 	client := openai.NewClient(option.WithBaseURL(endpoint), option.WithAPIKey(token))
-	return &AI{
+	return &Client{
 		client,
 	}
 
 }
 
-func (a *AI) ChatCompletion(ctx context.Context, req string) (resp string, err error) {
-	completion, err := a.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+func (c *Client) ChatCompletion(ctx context.Context, req string) (resp string, err error) {
+	completion, err := c.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
 		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage(req),
 		}),
