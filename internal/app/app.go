@@ -4,30 +4,31 @@ import (
 	"context"
 	"log"
 
+	"github.com/go-telegram/bot"
+	"github.com/sejo412/ya-boo/pkg/ai"
 	"github.com/sejo412/ya-boo/pkg/config"
-	"github.com/sejo412/ya-boo/pkg/tg"
 )
 
 type App struct {
-	Cfg *config.Config
+	cfg       *config.Config
+	telegram  *bot.Bot
+	aiClients map[string]*ai.Client
 }
 
 func NewApp(cfg *config.Config) *App {
-	return &App{cfg}
+	return &App{cfg: cfg, telegram: &bot.Bot{}, aiClients: make(map[string]*ai.Client)}
 }
 
 func (a *App) Run() error {
 	log.Println("starting server")
 
-	log.Printf("config: %#v\n", a.Cfg)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	tgBot, err := tg.NewBot(a.Cfg.TgSecret)
-	if err != nil {
-		return err
-	}
+	log.Printf("config: %#v\n", a.cfg)
 
-	tgBot.Bot.Start(ctx)
+	ctxTg, cancelTg := context.WithCancel(context.Background())
+	defer cancelTg()
 
-	return nil
+	localAi := ai.NewClient("http://127.0.0.1:8000", "")
+	a.aiClients["local"] = localAi
+
+	return a.StartTelegramBot(ctxTg, a.cfg.TgSecret)
 }

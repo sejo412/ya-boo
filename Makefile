@@ -11,4 +11,5 @@ lint:
 	golangci-lint run --config .golangci.yml
 
 .PHONY: statictest
+statictest:
 	go vet -vettool=$(which statictest) ./...

@@ -26,7 +26,7 @@ services:
 
   llama:
     image: ghcr.io/ggerganov/llama.cpp:server
-    command: '-m /models/dev-model.gguf --port 8000 --host 0.0.0.0 --ctx-size 100'
+    command: '-m /models/dev-model.gguf --port 8000 --host 0.0.0.0 --ctx-size 2048'
     volumes:
       - ./llm/models:/models
     ports:
