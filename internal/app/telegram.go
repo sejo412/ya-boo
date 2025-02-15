@@ -31,7 +31,7 @@ func (a *App) handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		}
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   fmt.Sprintf(resp),
+			Text:   resp,
 		})
 		if err != nil {
 			log.Printf("error sending message: %v", err)

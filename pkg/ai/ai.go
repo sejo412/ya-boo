@@ -16,7 +16,6 @@ func NewClient(endpoint, token string) *Client {
 	return &Client{
 		client,
 	}
-
 }
 
 func (c *Client) ChatCompletion(ctx context.Context, req string) (resp string, err error) {
