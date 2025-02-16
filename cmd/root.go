@@ -23,5 +23,6 @@ func Execute() {
 }
 
 func init() {
-
+	rootCmd.PersistentFlags().StringP("config", "c", "", "config file path")
+	rootCmd.PersistentFlags().StringP("dsn", "d", "", "database connection string")
 }
