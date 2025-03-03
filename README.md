@@ -35,3 +35,5 @@ $ podman run -v $(pwd)/llm/models:/models -p 8000:8000 ghcr.io/ggerganov/llama.c
 ```
 
 Сохраняем api-key для дальнейшего использования
+
+## Конфигурация и запуск

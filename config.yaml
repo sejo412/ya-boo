@@ -1,6 +1,7 @@
 port: 8081
 dsn: postgres://postgres:postgres@127.0.0.1:5432/database?sslmode=disable
 tgSecret: xxxxxx
+initBotSecret: xxxxxx
 providers:
   - name: local
     endpoint: 127.0.0.1:8080
