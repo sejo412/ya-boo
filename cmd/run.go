@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/sejo412/ya-boo/internal/app"
+	"github.com/sejo412/ya-boo/internal/db"
 	"github.com/sejo412/ya-boo/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,7 +22,9 @@ var runCmd = &cobra.Command{
 		if err := cfg.Load(v); err != nil {
 			panic(err)
 		}
-		a := app.NewApp(cfg)
+		var storage app.Storage
+		storage = db.NewPostgres()
+		a := app.NewApp(cfg, &storage)
 		if err := a.Run(); err != nil {
 			panic(err)
 		}
