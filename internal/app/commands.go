@@ -14,10 +14,11 @@ const (
 	CmdInit Command = iota
 	CmdApprove
 	CmdList
+	CmdBan
 )
 
 func (c Command) String() string {
-	return [...]string{"/init", "/approve", "/list"}[c]
+	return [...]string{"/init", "/approve", "/list", "/ban"}[c]
 }
 
 func cmdInitFirstAdmin(ctx context.Context, storage Storage, user models.User) error {
@@ -52,4 +53,19 @@ func cmdApproveUser(ctx context.Context, storage Storage, user models.User) (str
 		return "", fmt.Errorf("error approve user: %w", err)
 	}
 	return fmt.Sprintf("user successfully approved with role %s", user.Role.String()), nil
+}
+
+func cmdBanUser(ctx context.Context, storage Storage, user models.User) (string, error) {
+	registered, err := storage.IsRegisteredUser(ctx, user.ID)
+	if err != nil {
+		return "", fmt.Errorf("error check user: %w", err)
+	}
+	if !registered {
+		return "", errors.New("user is not registered")
+	}
+	err = storage.UpdateUserRole(ctx, user, models.RoleUnknown)
+	if err != nil {
+		return "", fmt.Errorf("error user ban: %w", err)
+	}
+	return fmt.Sprintf("user %d successfully banned", user.ID), nil
 }
