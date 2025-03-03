@@ -127,6 +127,22 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 			} else {
 				resp = res
 			}
+		case CmdBan.String():
+			id, err = strconv.Atoi(splited[1])
+			if err != nil {
+				log.Printf("[commandHandler] error ban user: %v", err)
+			}
+			res, err = cmdBanUser(ctx, a.db, m.User{
+				User: &models.User{
+					ID: int64(id),
+				},
+			})
+			if err != nil {
+				resp = err.Error()
+				log.Printf("[commandHandler] error ban user: %v", err)
+			} else {
+				resp = res
+			}
 		default:
 			resp = MessageUnknownCommand
 		}
