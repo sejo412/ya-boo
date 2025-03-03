@@ -98,11 +98,12 @@ func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message != nil {
 		var err error
-		var resp string
+		var resp, res string
+		var id int
 		splited := strings.Split(update.Message.Text, " ")
 		switch splited[0] {
 		case CmdList.String():
-			res, err := cmdListUsers(ctx, a.db)
+			res, err = cmdListUsers(ctx, a.db)
 			if err != nil {
 				resp = err.Error()
 				log.Printf("[commandHandler] error listing users: %v", err)
@@ -110,12 +111,11 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 				resp = res
 			}
 		case CmdApprove.String():
-			id, err := strconv.Atoi(splited[1])
+			id, err = strconv.Atoi(splited[1])
 			if err != nil {
-				resp = err.Error()
 				log.Printf("[commandHandler] error approving user: %v", err)
 			}
-			res, err := cmdApproveUser(ctx, a.db, m.User{
+			res, err = cmdApproveUser(ctx, a.db, m.User{
 				User: &models.User{
 					ID: int64(id),
 				},
@@ -141,20 +141,6 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 	}
 }
 
-func idHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if update.Message != nil {
-		resp := "*Your ID:* **" + fmt.Sprintf("%d", update.Message.From.ID) + "**"
-		_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      resp,
-			ParseMode: models.ParseModeMarkdown,
-		})
-		if err != nil {
-			log.Printf("[idHandler] error sending message: %v", err)
-		}
-	}
-
-}
 func (a *App) isInitMode(ctx context.Context) (bool, error) {
 	adminPresents, err := a.db.IsAdminsInitialized(ctx)
 	if err != nil {

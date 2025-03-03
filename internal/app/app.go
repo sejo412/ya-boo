@@ -15,8 +15,7 @@ type App struct {
 	telegram  *bot.Bot
 	aiClients map[string]*ai.Client
 	db        Storage
-	// initMode  bool
-	initID string
+	initID    string
 }
 
 type Storage interface {
@@ -32,12 +31,12 @@ type Storage interface {
 	ListUsers(ctx context.Context) ([]models.User, error)
 }
 
-func NewApp(cfg *config.Config, storage *Storage) *App {
+func NewApp(cfg *config.Config, storage Storage) *App {
 	return &App{
 		cfg:       cfg,
 		telegram:  &bot.Bot{},
 		aiClients: make(map[string]*ai.Client),
-		db:        *storage,
+		db:        storage,
 		initID:    "",
 	}
 }

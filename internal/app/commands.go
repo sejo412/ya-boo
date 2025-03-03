@@ -33,7 +33,7 @@ func cmdListUsers(ctx context.Context, storage Storage) (string, error) {
 		return "", fmt.Errorf("error list users: %w", err)
 	}
 	for _, user := range users {
-		result += fmt.Sprintf("| %s | %s | %s | %s | %s |\n",
+		result += fmt.Sprintf("| %d | %s | %s | %s | %s |\n",
 			user.ID, user.Username, user.FirstName, user.LastName, user.Role)
 	}
 	return result, nil

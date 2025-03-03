@@ -22,9 +22,8 @@ var runCmd = &cobra.Command{
 		if err := cfg.Load(v); err != nil {
 			panic(err)
 		}
-		var storage app.Storage
-		storage = db.NewPostgres()
-		a := app.NewApp(cfg, &storage)
+		storage := db.NewPostgres()
+		a := app.NewApp(cfg, storage)
 		if err := a.Run(); err != nil {
 			panic(err)
 		}
