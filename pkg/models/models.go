@@ -3,7 +3,7 @@ package models
 import "github.com/go-telegram/bot/models"
 
 type LLM struct {
-	Id          int64
+	ID          int64
 	Name        string
 	Endpoint    string
 	Token       string

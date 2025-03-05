@@ -90,7 +90,7 @@ func (p *Postgres) UpsertUser(ctx context.Context, user m.User) error {
 		ON CONFLICT(id) DO UPDATE
 		SET first_name = $2, last_name = $3, username = $4, role = $5, updated = $6, llm = $7`
 	_, err := p.DB.ExecContext(ctx, query, user.ID, user.FirstName, user.LastName, user.Username, user.Role, updated,
-		user.LLM.Id)
+		user.LLM.ID)
 	if err != nil {
 		log.Printf("failed to upsert user: %v", err)
 		return err
@@ -164,7 +164,7 @@ func (p *Postgres) GetLLMs(ctx context.Context) ([]m.LLM, error) {
 			return nil, fmt.Errorf("failed to scan llms: %w", err)
 		}
 		result = append(result, m.LLM{
-			Id:          id,
+			ID:          id,
 			Name:        name,
 			Endpoint:    endpoint,
 			Token:       token,
@@ -190,7 +190,7 @@ func (p *Postgres) GetUserLLM(ctx context.Context, userId int64) (m.LLM, error) 
 		return m.LLM{}, fmt.Errorf("failed to make query: %w", err)
 	}
 	return m.LLM{
-		Id:          id,
+		ID:          id,
 		Name:        name,
 		Endpoint:    endpoint,
 		Description: description,
@@ -212,7 +212,7 @@ func (p *Postgres) AddLLM(ctx context.Context, llm m.LLM) error {
 
 func (p *Postgres) RemoveLLM(ctx context.Context, llm m.LLM) error {
 	query := "DELETE FROM llm WHERE id = $1"
-	_, err := p.DB.ExecContext(ctx, query, llm.Id)
+	_, err := p.DB.ExecContext(ctx, query, llm.ID)
 	if err != nil {
 		log.Printf("failed remove llm: %v", err)
 		return err
@@ -222,7 +222,7 @@ func (p *Postgres) RemoveLLM(ctx context.Context, llm m.LLM) error {
 
 func (p *Postgres) SetUserLLM(ctx context.Context, userId int64, llm m.LLM) error {
 	query := "UPDATE users SET llm = $1, updated = $2 WHERE id = $3"
-	_, err := p.DB.ExecContext(ctx, query, llm.Id, time.Now(), userId)
+	_, err := p.DB.ExecContext(ctx, query, llm.ID, time.Now(), userId)
 	if err != nil {
 		log.Printf("failed update user llm: %v", err)
 		return err

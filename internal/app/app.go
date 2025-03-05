@@ -32,10 +32,10 @@ type Storage interface {
 	UpdateUserRole(ctx context.Context, user models.User, role models.Role) error
 	ListUsers(ctx context.Context) ([]models.User, error)
 	GetLLMs(ctx context.Context) ([]models.LLM, error)
-	GetUserLLM(ctx context.Context, userId int64) (models.LLM, error)
+	GetUserLLM(ctx context.Context, userID int64) (models.LLM, error)
 	AddLLM(ctx context.Context, llm models.LLM) error
 	RemoveLLM(ctx context.Context, llm models.LLM) error
-	SetUserLLM(ctx context.Context, userId int64, llm models.LLM) error
+	SetUserLLM(ctx context.Context, userID int64, llm models.LLM) error
 }
 
 func NewApp(cfg *config.Config, storage Storage) *App {
@@ -71,7 +71,7 @@ func (a *App) initLLMs() error {
 		return fmt.Errorf("error get llms: %w", err)
 	}
 	for _, llm := range llms {
-		a.aiClients[llm.Id] = ai.NewClient(llm.Endpoint, llm.Token)
+		a.aiClients[llm.ID] = ai.NewClient(llm.Endpoint, llm.Token)
 	}
 	return nil
 }

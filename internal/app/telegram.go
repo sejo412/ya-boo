@@ -50,7 +50,7 @@ func (a *App) initHandler(ctx context.Context, b *bot.Bot, update *models.Update
 					Username:  update.Message.From.Username,
 				},
 				Role: m.RoleAdmin,
-				LLM:  m.LLM{Id: 0},
+				LLM:  m.LLM{ID: 0},
 			}); err != nil {
 				resp = err.Error()
 			} else {
@@ -83,10 +83,10 @@ func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 		var err error
 		var resp string
 		llm, err := a.db.GetUserLLM(ctx, update.Message.From.ID)
-		if err != nil || llm.Id == 0 {
+		if err != nil || llm.ID == 0 {
 			resp = MessageHelper
 		} else {
-			resp, err = a.aiClients[llm.Id].ChatCompletion(ctx, update.Message.Text)
+			resp, err = a.aiClients[llm.ID].ChatCompletion(ctx, update.Message.Text)
 			if err != nil {
 				log.Printf("error completing message: %v", err)
 				resp = MessageLLMError
@@ -175,6 +175,7 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 			}
 			if err = cmdLlmAdd(ctx, a.db, update.Message.Text); err != nil {
 				resp = err.Error()
+				break
 			}
 			resp = MessageLLMAddSuccess
 		case CmdLlmRemove.String():
@@ -211,6 +212,7 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 			}
 			if err = cmdLlmUse(ctx, a.db, update.Message.From.ID, int64(id)); err != nil {
 				resp = err.Error()
+				break
 			}
 			resp = fmt.Sprintf("switched to llm: %d", id)
 		default:

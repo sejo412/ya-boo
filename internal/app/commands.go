@@ -84,7 +84,7 @@ func cmdLlmList(ctx context.Context, storage Storage) (string, error) {
 	result += "| ID | Name | Description |\n"
 	result += "|----|------|-------------|\n"
 	for _, llm := range llmList {
-		result += fmt.Sprintf("| %d | %s | %s |\n", llm.Id, llm.Name, llm.Description)
+		result += fmt.Sprintf("| %d | %s | %s |\n", llm.ID, llm.Name, llm.Description)
 	}
 	return result, nil
 }
@@ -99,7 +99,7 @@ func cmdLlmAdd(ctx context.Context, storage Storage, message string) error {
 
 func cmdLlmUse(ctx context.Context, storage Storage, userId int64, llmId int64) error {
 	llm := models.LLM{
-		Id: llmId,
+		ID: llmId,
 	}
 	if err := storage.SetUserLLM(ctx, userId, llm); err != nil {
 		return fmt.Errorf("error set llm for user: %w", err)
@@ -108,7 +108,7 @@ func cmdLlmUse(ctx context.Context, storage Storage, userId int64, llmId int64) 
 }
 
 func cmdLlmRemove(ctx context.Context, storage Storage, id int64) error {
-	llm := models.LLM{Id: id}
+	llm := models.LLM{ID: id}
 	if err := storage.RemoveLLM(ctx, llm); err != nil {
 		return fmt.Errorf("error remove llm: %w", err)
 	}
