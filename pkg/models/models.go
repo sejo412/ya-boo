@@ -2,6 +2,14 @@ package models
 
 import "github.com/go-telegram/bot/models"
 
+type LLM struct {
+	Id          int64
+	Name        string
+	Endpoint    string
+	Token       string
+	Description string
+}
+
 type Role int
 
 const (
@@ -13,6 +21,7 @@ const (
 type User struct {
 	*models.User
 	Role Role
+	LLM  LLM
 }
 
 func (r Role) String() string {

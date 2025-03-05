@@ -1,0 +1,1 @@
+DELETE FROM llm WHERE id = 0;

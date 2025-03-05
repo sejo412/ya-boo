@@ -50,6 +50,7 @@ func (a *App) initHandler(ctx context.Context, b *bot.Bot, update *models.Update
 					Username:  update.Message.From.Username,
 				},
 				Role: m.RoleAdmin,
+				LLM:  m.LLM{Id: 0},
 			}); err != nil {
 				resp = err.Error()
 			} else {
@@ -80,9 +81,16 @@ func (a *App) initHandler(ctx context.Context, b *bot.Bot, update *models.Update
 func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message != nil {
 		var err error
-		resp, err := a.aiClients["local"].ChatCompletion(ctx, update.Message.Text)
-		if err != nil {
-			log.Printf("error completing message: %v", err)
+		var resp string
+		llm, err := a.db.GetUserLLM(ctx, update.Message.From.ID)
+		if err != nil || llm.Id == 0 {
+			resp = MessageHelper
+		} else {
+			resp, err = a.aiClients[llm.Id].ChatCompletion(ctx, update.Message.Text)
+			if err != nil {
+				log.Printf("error completing message: %v", err)
+				resp = MessageLLMError
+			}
 		}
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
@@ -100,9 +108,15 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 		var err error
 		var resp, res string
 		var id int
+		var isAdmin bool
 		splited := strings.Split(update.Message.Text, " ")
 		switch splited[0] {
 		case CmdList.String():
+			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
+			if err != nil || !isAdmin {
+				resp = MessageNotAuthorized
+				break
+			}
 			res, err = cmdListUsers(ctx, a.db)
 			if err != nil {
 				resp = err.Error()
@@ -111,6 +125,11 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 				resp = res
 			}
 		case CmdApprove.String():
+			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
+			if err != nil || !isAdmin {
+				resp = MessageNotAuthorized
+				break
+			}
 			id, err = strconv.Atoi(splited[1])
 			if err != nil {
 				log.Printf("[commandHandler] error approving user: %v", err)
@@ -128,6 +147,11 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 				resp = res
 			}
 		case CmdBan.String():
+			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
+			if err != nil || !isAdmin {
+				resp = MessageNotAuthorized
+				break
+			}
 			id, err = strconv.Atoi(splited[1])
 			if err != nil {
 				log.Printf("[commandHandler] error ban user: %v", err)
@@ -143,6 +167,52 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 			} else {
 				resp = res
 			}
+		case CmdLlmAdd.String():
+			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
+			if err != nil || !isAdmin {
+				resp = MessageNotAuthorized
+				break
+			}
+			if err = cmdLlmAdd(ctx, a.db, update.Message.Text); err != nil {
+				resp = err.Error()
+			}
+			resp = MessageLLMAddSuccess
+		case CmdLlmRemove.String():
+			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
+			if err != nil || !isAdmin {
+				resp = MessageNotAuthorized
+				break
+			}
+			id, err = strconv.Atoi(splited[1])
+			if err != nil {
+				log.Printf("[commandHandler] error remove llm: %v", err)
+				resp = fmt.Sprintf("error remov llm: %v", err)
+				break
+			}
+			if err = cmdLlmRemove(ctx, a.db, int64(id)); err != nil {
+				log.Printf("[commandHandler] error remove llm: %v", err)
+				resp = fmt.Sprintf("error remove llm: %v", err)
+				break
+			}
+		case CmdLlmList.String():
+			res, err = cmdLlmList(ctx, a.db)
+			if err != nil {
+				resp = err.Error()
+				log.Printf("[commandHandler] error listing llm: %v", err)
+			} else {
+				resp = res
+			}
+		case CmdLlmUse.String():
+			id, err = strconv.Atoi(splited[1])
+			if err != nil {
+				log.Printf("[commandHandler] error use llm: %v", err)
+				resp = fmt.Sprintf("error use llm: %v", err)
+				break
+			}
+			if err = cmdLlmUse(ctx, a.db, update.Message.From.ID, int64(id)); err != nil {
+				resp = err.Error()
+			}
+			resp = fmt.Sprintf("switched to llm: %d", id)
 		default:
 			resp = MessageUnknownCommand
 		}

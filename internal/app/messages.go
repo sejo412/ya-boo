@@ -13,10 +13,17 @@ Type /init <secret> to initialize the bot with first admin:
 Bot initialized successfully.
 Switch to normal mode.
 `
-	MessageUnknownCommand string = `
-Unknown command.
+	MessageHelper string = `
+LLM not chosen
+use:
+*/llmlist* - list available llm
+*/llmuse*  - use llm by id
 `
-	MessageBadInitSecret string = `
-Bad init secret.
-`
+	MessageLLMAddUsage    string = "use */llmadd* name=<name> endpoint=<endpoint> [token=<token>] [desc=<desc>]"
+	MessageLLMAddSuccess  string = "llm add success"
+	MessageLLMAddError    string = "llm add fail"
+	MessageLLMError       string = "Error with llm."
+	MessageUnknownCommand string = "Unknown command."
+	MessageBadInitSecret  string = "Bad init secret."
+	MessageNotAuthorized  string = "You are not authorized to use this command."
 )
