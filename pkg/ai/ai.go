@@ -24,7 +24,6 @@ func (c *Client) ChatCompletion(ctx context.Context, req string) (resp string, e
 			openai.UserMessage(req),
 		}),
 		Seed: openai.Int(1),
-		// Model: openai.F(openai.ChatModelGPT4o),
 	})
 	if err != nil {
 		return "", err

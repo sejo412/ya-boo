@@ -14,9 +14,13 @@ import (
 type App struct {
 	cfg       *config.Config
 	telegram  *bot.Bot
-	aiClients map[int64]*ai.Client
+	aiClients map[int64]AiClient
 	db        Storage
 	initID    string
+}
+
+type AiClient interface {
+	ChatCompletion(ctx context.Context, req string) (resp string, err error)
 }
 
 type Storage interface {
@@ -42,7 +46,7 @@ func NewApp(cfg *config.Config, storage Storage) *App {
 	return &App{
 		cfg:       cfg,
 		telegram:  &bot.Bot{},
-		aiClients: make(map[int64]*ai.Client),
+		aiClients: make(map[int64]AiClient),
 		db:        storage,
 		initID:    "",
 	}
