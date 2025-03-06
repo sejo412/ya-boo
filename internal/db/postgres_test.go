@@ -17,10 +17,21 @@ import (
 var TestDB = NewPostgres()
 
 func TestMain(m *testing.M) {
-	fmt.Println("open db")
-	_ = TestDB.Open("postgres://postgres:postgres@127.0.0.1:5432/praktikum?sslmode=disable")
+	fmt.Println("init integration tests")
+	var dbEndpoint string
+	_, ok := os.LookupEnv("GITHUB_ACTIONS")
+	if ok {
+		dbEndpoint = "postgres"
+	} else {
+		dbEndpoint = "127.0.0.1"
+	}
+	if err := TestDB.Open(fmt.Sprintf("postgres://postgres:postgres@%s:5432/praktikum?sslmode=disable",
+		dbEndpoint)); err != nil {
+		panic(err)
+	}
 	defer TestDB.Close()
 	exitVal := m.Run()
+	fmt.Println("clear integration tests data")
 	_, _ = TestDB.DB.Exec("DELETE FROM users WHERE id < 0")
 	_, _ = TestDB.DB.Exec("DELETE FROM llm WHERE id < 0")
 	os.Exit(exitVal)
