@@ -203,11 +203,21 @@ func (p *Postgres) GetUserLLM(ctx context.Context, userID int64) (m.LLM, error) 
 }
 
 func (p *Postgres) AddLLM(ctx context.Context, llm m.LLM) error {
-	query := `
+	var query string
+	var err error
+	if llm.ID == 0 {
+		query = `
 		INSERT INTO llm
 		(name, endpoint, token, description)
-		VALUES ($1, $2, $3, $4) ON CONFLICT (name) DO NOTHING`
-	_, err := p.DB.ExecContext(ctx, query, llm.Name, llm.Endpoint, llm.Token, llm.Description)
+		VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING`
+		_, err = p.DB.ExecContext(ctx, query, llm.Name, llm.Endpoint, llm.Token, llm.Description)
+	} else {
+		query = `
+		INSERT INTO llm
+		(id, name, endpoint, token, description)
+		VALUES ($1, $2, $3, $4, $5) ON CONFLICT DO NOTHING`
+		_, err = p.DB.ExecContext(ctx, query, llm.ID, llm.Name, llm.Endpoint, llm.Token, llm.Description)
+	}
 	if err != nil {
 		log.Printf("failed add llm: %v", err)
 		return err
