@@ -25,7 +25,7 @@ type Storage interface {
 	Ping() error
 	IsAdminsInitialized(ctx context.Context) (bool, error)
 	IsUserPresent(ctx context.Context, id int64) (bool, error)
-	IsAdmin(ctx context.Context, id int64) (bool, error)
+	IsAdmin(ctx context.Context, id int64) bool
 	IsRegisteredUser(ctx context.Context, id int64) (bool, error)
 	IsWaitingApprove(ctx context.Context, id int64) (bool, error)
 	UpsertUser(ctx context.Context, user models.User) error

@@ -89,7 +89,7 @@ func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 			resp, err = a.aiClients[llm.ID].ChatCompletion(ctx, update.Message.Text)
 			if err != nil {
 				log.Printf("error completing message: %v", err)
-				resp = MessageLLMError
+				resp = MessageLLMInternalError
 			}
 		}
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
@@ -106,126 +106,62 @@ func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message != nil {
 		var err error
-		var resp, res string
+		var resp string
 		var id int
-		var isAdmin bool
 		splited := strings.Split(update.Message.Text, " ")
-		switch splited[0] {
-		case CmdList.String():
-			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
-			if err != nil || !isAdmin {
-				resp = MessageNotAuthorized
-				break
-			}
-			res, err = cmdListUsers(ctx, a.db)
-			if err != nil {
-				resp = err.Error()
-				log.Printf("[commandHandler] error listing users: %v", err)
-			} else {
-				resp = res
-			}
-		case CmdApprove.String():
-			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
-			if err != nil || !isAdmin {
-				resp = MessageNotAuthorized
-				break
-			}
+		c := ToCommand(splited[0])
+		if !a.db.IsAdmin(ctx, update.Message.From.ID) && c.IsAdminCommand() {
+			sendResponseFromCommand(ctx, b, update, MessageNotAuthorized)
+			return
+		}
+
+		switch c {
+		case CmdList:
+			resp = cmdListUsers(ctx, a.db)
+		case CmdApprove:
 			id, err = strconv.Atoi(splited[1])
 			if err != nil {
-				log.Printf("[commandHandler] error approving user: %v", err)
-			}
-			res, err = cmdApproveUser(ctx, a.db, m.User{
-				User: &models.User{
-					ID: int64(id),
-				},
-				Role: m.RoleRegularUser,
-			})
-			if err != nil {
-				resp = err.Error()
-				log.Printf("[commandHandler] error approving user: %v", err)
-			} else {
-				resp = res
-			}
-		case CmdBan.String():
-			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
-			if err != nil || !isAdmin {
-				resp = MessageNotAuthorized
+				resp = MessageErrorApproveUser + ": " + err.Error()
 				break
 			}
-			id, err = strconv.Atoi(splited[1])
-			if err != nil {
-				log.Printf("[commandHandler] error ban user: %v", err)
-			}
-			res, err = cmdBanUser(ctx, a.db, m.User{
+			resp = cmdApproveUser(ctx, a.db, m.User{
 				User: &models.User{
 					ID: int64(id),
 				},
 			})
-			if err != nil {
-				resp = err.Error()
-				log.Printf("[commandHandler] error ban user: %v", err)
-			} else {
-				resp = res
-			}
-		case CmdLlmAdd.String():
-			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
-			if err != nil || !isAdmin {
-				resp = MessageNotAuthorized
-				break
-			}
-			if err = cmdLlmAdd(ctx, a.db, update.Message.Text); err != nil {
-				resp = err.Error()
-				break
-			}
-			resp = MessageLLMAddSuccess
-		case CmdLlmRemove.String():
-			isAdmin, err = a.db.IsAdmin(ctx, update.Message.From.ID)
-			if err != nil || !isAdmin {
-				resp = MessageNotAuthorized
-				break
-			}
+		case CmdBan:
 			id, err = strconv.Atoi(splited[1])
 			if err != nil {
-				log.Printf("[commandHandler] error remove llm: %v", err)
-				resp = fmt.Sprintf("error remov llm: %v", err)
+				resp = MessageErrorBanUser + ": " + err.Error()
 				break
 			}
-			if err = cmdLlmRemove(ctx, a.db, int64(id)); err != nil {
-				log.Printf("[commandHandler] error remove llm: %v", err)
-				resp = fmt.Sprintf("error remove llm: %v", err)
-				break
-			}
-		case CmdLlmList.String():
-			res, err = cmdLlmList(ctx, a.db)
-			if err != nil {
-				resp = err.Error()
-				log.Printf("[commandHandler] error listing llm: %v", err)
-			} else {
-				resp = res
-			}
-		case CmdLlmUse.String():
+			resp = cmdBanUser(ctx, a.db, m.User{
+				User: &models.User{
+					ID: int64(id),
+				},
+			})
+		case CmdLlmAdd:
+			resp = cmdLlmAdd(ctx, a.db, update.Message.Text)
+		case CmdLlmRemove:
 			id, err = strconv.Atoi(splited[1])
 			if err != nil {
-				log.Printf("[commandHandler] error use llm: %v", err)
-				resp = fmt.Sprintf("error use llm: %v", err)
+				resp = MessageErrorBanUser + ": " + err.Error()
 				break
 			}
-			if err = cmdLlmUse(ctx, a.db, update.Message.From.ID, int64(id)); err != nil {
-				resp = err.Error()
+			resp = cmdLlmRemove(ctx, a.db, int64(id))
+		case CmdLlmList:
+			resp = cmdLlmList(ctx, a.db)
+		case CmdLlmUse:
+			id, err = strconv.Atoi(splited[1])
+			if err != nil {
+				resp = MessageErrorBanUser + ": " + err.Error()
 				break
 			}
-			resp = fmt.Sprintf("switched to llm: %d", id)
+			resp = cmdLlmUse(ctx, a.db, update.Message.From.ID, int64(id))
 		default:
 			resp = MessageUnknownCommand
 		}
-		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      bot.EscapeMarkdown(resp),
-			ParseMode: models.ParseModeMarkdown,
-		})
-		if err != nil {
-			log.Printf("[commandHandler] error sending message: %v", err)
-		}
+		sendResponseFromCommand(ctx, b, update, resp)
 	}
 }
 
@@ -284,5 +220,15 @@ func (a *App) checkUser(next bot.HandlerFunc) bot.HandlerFunc {
 			}
 			return
 		}
+	}
+}
+func sendResponseFromCommand(ctx context.Context, b *bot.Bot, update *models.Update, text string) {
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:    update.Message.Chat.ID,
+		Text:      text,
+		ParseMode: models.ParseModeMarkdown,
+	})
+	if err != nil {
+		log.Printf("error sending message: %v", err)
 	}
 }

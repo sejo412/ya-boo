@@ -53,8 +53,13 @@ func (p *Postgres) IsUserPresent(ctx context.Context, id int64) (bool, error) {
 	return isTrue(p.DB.QueryRowContext(ctx, "SELECT id FROM users WHERE id = $1", id))
 }
 
-func (p *Postgres) IsAdmin(ctx context.Context, id int64) (bool, error) {
-	return isTrue(p.DB.QueryRowContext(ctx, "SELECT id FROM users WHERE id = $1 AND role = $2", id, m.RoleAdmin))
+func (p *Postgres) IsAdmin(ctx context.Context, id int64) bool {
+	isAdmin, err := isTrue(p.DB.QueryRowContext(ctx, "SELECT id FROM users WHERE id = $1 AND role = $2", id,
+		m.RoleAdmin))
+	if err != nil {
+		return false
+	}
+	return isAdmin
 }
 
 func (p *Postgres) IsWaitingApprove(ctx context.Context, id int64) (bool, error) {
@@ -178,14 +183,14 @@ func (p *Postgres) GetLLMs(ctx context.Context) ([]m.LLM, error) {
 	return result, nil
 }
 
-func (p *Postgres) GetUserLLM(ctx context.Context, userId int64) (m.LLM, error) {
+func (p *Postgres) GetUserLLM(ctx context.Context, userID int64) (m.LLM, error) {
 	var id int64
 	var name, endpoint, description string
 	query := `
 		SELECT llm.id, llm.name, llm.endpoint, llm.description FROM llm 
 			JOIN users ON llm.id = users.llm
 		WHERE users.id = $1`
-	if err := p.DB.QueryRowContext(ctx, query, userId).Scan(&id, &name, &endpoint, &description); err != nil {
+	if err := p.DB.QueryRowContext(ctx, query, userID).Scan(&id, &name, &endpoint, &description); err != nil {
 		log.Printf("failed to make query: %v", err)
 		return m.LLM{}, fmt.Errorf("failed to make query: %w", err)
 	}
@@ -220,9 +225,9 @@ func (p *Postgres) RemoveLLM(ctx context.Context, llm m.LLM) error {
 	return nil
 }
 
-func (p *Postgres) SetUserLLM(ctx context.Context, userId int64, llm m.LLM) error {
+func (p *Postgres) SetUserLLM(ctx context.Context, userID int64, llm m.LLM) error {
 	query := "UPDATE users SET llm = $1, updated = $2 WHERE id = $3"
-	_, err := p.DB.ExecContext(ctx, query, llm.ID, time.Now(), userId)
+	_, err := p.DB.ExecContext(ctx, query, llm.ID, time.Now(), userID)
 	if err != nil {
 		log.Printf("failed update user llm: %v", err)
 		return err
