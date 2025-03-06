@@ -50,6 +50,7 @@ func (a *App) initHandler(ctx context.Context, b *bot.Bot, update *models.Update
 					Username:  update.Message.From.Username,
 				},
 				Role: m.RoleAdmin,
+				LLM:  m.LLM{ID: 0},
 			}); err != nil {
 				resp = err.Error()
 			} else {
@@ -80,9 +81,16 @@ func (a *App) initHandler(ctx context.Context, b *bot.Bot, update *models.Update
 func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message != nil {
 		var err error
-		resp, err := a.aiClients["local"].ChatCompletion(ctx, update.Message.Text)
-		if err != nil {
-			log.Printf("error completing message: %v", err)
+		var resp string
+		llm, err := a.db.GetUserLLM(ctx, update.Message.From.ID)
+		if err != nil || llm.ID == 0 {
+			resp = MessageHelper
+		} else {
+			resp, err = a.aiClients[llm.ID].ChatCompletion(ctx, update.Message.Text)
+			if err != nil {
+				log.Printf("error completing message: %v", err)
+				resp = MessageLLMInternalError
+			}
 		}
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
@@ -98,62 +106,62 @@ func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message != nil {
 		var err error
-		var resp, res string
+		var resp string
 		var id int
 		splited := strings.Split(update.Message.Text, " ")
-		switch splited[0] {
-		case CmdList.String():
-			res, err = cmdListUsers(ctx, a.db)
-			if err != nil {
-				resp = err.Error()
-				log.Printf("[commandHandler] error listing users: %v", err)
-			} else {
-				resp = res
-			}
-		case CmdApprove.String():
+		c := ToCommand(splited[0])
+		if !a.db.IsAdmin(ctx, update.Message.From.ID) && c.IsAdminCommand() {
+			sendResponseFromCommand(ctx, b, update, MessageNotAuthorized)
+			return
+		}
+
+		switch c {
+		case CmdList:
+			resp = cmdListUsers(ctx, a.db)
+		case CmdApprove:
 			id, err = strconv.Atoi(splited[1])
 			if err != nil {
-				log.Printf("[commandHandler] error approving user: %v", err)
+				resp = MessageErrorApproveUser + ": " + err.Error()
+				break
 			}
-			res, err = cmdApproveUser(ctx, a.db, m.User{
-				User: &models.User{
-					ID: int64(id),
-				},
-				Role: m.RoleRegularUser,
-			})
-			if err != nil {
-				resp = err.Error()
-				log.Printf("[commandHandler] error approving user: %v", err)
-			} else {
-				resp = res
-			}
-		case CmdBan.String():
-			id, err = strconv.Atoi(splited[1])
-			if err != nil {
-				log.Printf("[commandHandler] error ban user: %v", err)
-			}
-			res, err = cmdBanUser(ctx, a.db, m.User{
+			resp = cmdApproveUser(ctx, a.db, m.User{
 				User: &models.User{
 					ID: int64(id),
 				},
 			})
+		case CmdBan:
+			id, err = strconv.Atoi(splited[1])
 			if err != nil {
-				resp = err.Error()
-				log.Printf("[commandHandler] error ban user: %v", err)
-			} else {
-				resp = res
+				resp = MessageErrorBanUser + ": " + err.Error()
+				break
 			}
+			resp = cmdBanUser(ctx, a.db, m.User{
+				User: &models.User{
+					ID: int64(id),
+				},
+			})
+		case CmdLlmAdd:
+			resp = cmdLlmAdd(ctx, a.db, update.Message.Text)
+		case CmdLlmRemove:
+			id, err = strconv.Atoi(splited[1])
+			if err != nil {
+				resp = MessageErrorBanUser + ": " + err.Error()
+				break
+			}
+			resp = cmdLlmRemove(ctx, a.db, int64(id))
+		case CmdLlmList:
+			resp = cmdLlmList(ctx, a.db)
+		case CmdLlmUse:
+			id, err = strconv.Atoi(splited[1])
+			if err != nil {
+				resp = MessageErrorBanUser + ": " + err.Error()
+				break
+			}
+			resp = cmdLlmUse(ctx, a.db, update.Message.From.ID, int64(id))
 		default:
 			resp = MessageUnknownCommand
 		}
-		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      bot.EscapeMarkdown(resp),
-			ParseMode: models.ParseModeMarkdown,
-		})
-		if err != nil {
-			log.Printf("[commandHandler] error sending message: %v", err)
-		}
+		sendResponseFromCommand(ctx, b, update, resp)
 	}
 }
 
@@ -212,5 +220,15 @@ func (a *App) checkUser(next bot.HandlerFunc) bot.HandlerFunc {
 			}
 			return
 		}
+	}
+}
+func sendResponseFromCommand(ctx context.Context, b *bot.Bot, update *models.Update, text string) {
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:    update.Message.Chat.ID,
+		Text:      text,
+		ParseMode: models.ParseModeMarkdown,
+	})
+	if err != nil {
+		log.Printf("error sending message: %v", err)
 	}
 }
