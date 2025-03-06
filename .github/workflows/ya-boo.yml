@@ -31,4 +31,5 @@ jobs:
         uses: actions/checkout@v2
       - name: Test
         run: |
-          go test
+          go run ./main.go migrate -c config.yaml
+          go test -v -tags integration ./...
