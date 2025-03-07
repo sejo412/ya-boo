@@ -142,6 +142,7 @@ func (a *App) commandHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 			})
 		case CmdLlmAdd:
 			resp = cmdLlmAdd(ctx, a.db, update.Message.Text)
+			_ = a.initLLMs()
 		case CmdLlmRemove:
 			id, err = strconv.Atoi(splited[1])
 			if err != nil {
@@ -225,7 +226,7 @@ func (a *App) checkUser(next bot.HandlerFunc) bot.HandlerFunc {
 func sendResponseFromCommand(ctx context.Context, b *bot.Bot, update *models.Update, text string) {
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:    update.Message.Chat.ID,
-		Text:      text,
+		Text:      bot.EscapeMarkdown(text),
 		ParseMode: models.ParseModeMarkdown,
 	})
 	if err != nil {

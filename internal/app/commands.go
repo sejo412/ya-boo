@@ -143,7 +143,7 @@ func cmdLlmAdd(ctx context.Context, storage Storage, message string) string {
 		return MessageErrorParseLLM + ": " + err.Error()
 	}
 	if err = storage.AddLLM(ctx, llm); err != nil {
-		return MessageErrorLLMAdd + ": " + err.Error()
+		return MessageErrorLLMAdd + ": " + err.Error() + "\n " + MessageLLMAddUsage
 	}
 	return MessageSuccessLLMAdd
 }
