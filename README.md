@@ -81,6 +81,12 @@ $ make down || task down
 /llmadd name=local endpoint=http://llama:8000 desc=локальная_модель_meta
 ```
 
+Регистрация внешней LLM на примере ChatGPT (**Внимание! Подписка ChatGPT PLUS/PRO не означает доступ к API**, api-запросы тарифицируются отдельно)
+
+```
+/llmadd name=local endpoint=https://api.openai.com token=<token> desc=chatGPT
+```
+
 *TODO* [доработать парсилку с поддержкой пробелов в значениях параметров](https://github.com/sejo412/ya-boo/issues/20)
 
 Вывод зарегистрированных моделей:

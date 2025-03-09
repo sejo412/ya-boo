@@ -32,8 +32,8 @@ func TestMain(m *testing.M) {
 	defer TestDB.Close()
 	exitVal := m.Run()
 	fmt.Println("clear integration tests data")
-	_, _ = TestDB.DB.Exec("DELETE FROM users WHERE id < 0")
-	_, _ = TestDB.DB.Exec("DELETE FROM llm WHERE id < 0")
+	_, _ = TestDB.db.Exec("DELETE FROM users WHERE id < 0")
+	_, _ = TestDB.db.Exec("DELETE FROM llm WHERE id < 0")
 	os.Exit(exitVal)
 }
 
@@ -54,7 +54,7 @@ func TestPostgres_UpsertUser(t *testing.T) {
 		{
 			name: "Upsert admin user success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -71,7 +71,7 @@ func TestPostgres_UpsertUser(t *testing.T) {
 		{
 			name: "Upsert regular user success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -88,7 +88,7 @@ func TestPostgres_UpsertUser(t *testing.T) {
 		{
 			name: "Upsert unknown user success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -106,7 +106,7 @@ func TestPostgres_UpsertUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			if err := p.UpsertUser(tt.args.ctx, tt.args.user); (err != nil) != tt.wantErr {
 				t.Errorf("UpsertUser() error = %v, wantErr %v", err, tt.wantErr)
@@ -131,7 +131,7 @@ func TestPostgres_ListUsers(t *testing.T) {
 		{
 			name: "List Users success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -142,7 +142,7 @@ func TestPostgres_ListUsers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.ListUsers(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
@@ -185,7 +185,7 @@ func TestPostgres_AddLLM(t *testing.T) {
 		{
 			name: "Add LLM success #1",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -199,7 +199,7 @@ func TestPostgres_AddLLM(t *testing.T) {
 		{
 			name: "Add LLM success #2",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -214,7 +214,7 @@ func TestPostgres_AddLLM(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			if err := p.AddLLM(tt.args.ctx, tt.args.llm); (err != nil) != tt.wantErr {
 				t.Errorf("AddLLM() error = %v, wantErr %v", err, tt.wantErr)
@@ -239,7 +239,7 @@ func TestPostgres_GetLLMs(t *testing.T) {
 		{
 			name: "Get LLMs success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -250,7 +250,7 @@ func TestPostgres_GetLLMs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.GetLLMs(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
@@ -291,7 +291,7 @@ func TestPostgres_SetUserLLM(t *testing.T) {
 		{
 			name: "Set User LLM success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx:    context.Background(),
@@ -305,7 +305,7 @@ func TestPostgres_SetUserLLM(t *testing.T) {
 		{
 			name: "Set User LLM error",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx:    context.Background(),
@@ -320,7 +320,7 @@ func TestPostgres_SetUserLLM(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			if err := p.SetUserLLM(tt.args.ctx, tt.args.userID, tt.args.llm); (err != nil) != tt.wantErr {
 				t.Errorf("SetUserLLM() error = %v, wantErr %v", err, tt.wantErr)
@@ -347,7 +347,7 @@ func TestPostgres_GetUserLLM(t *testing.T) {
 		{
 			name: "Get user LLM success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx:    context.Background(),
@@ -364,7 +364,7 @@ func TestPostgres_GetUserLLM(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.GetUserLLM(tt.args.ctx, tt.args.userID)
 			if (err != nil) != tt.wantErr {
@@ -395,7 +395,7 @@ func TestPostgres_IsAdmin(t *testing.T) {
 		{
 			name: "IsAdmin true",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -406,7 +406,7 @@ func TestPostgres_IsAdmin(t *testing.T) {
 		{
 			name: "IsAdmin false",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -418,7 +418,7 @@ func TestPostgres_IsAdmin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			if got := p.IsAdmin(tt.args.ctx, tt.args.id); got != tt.want {
 				t.Errorf("IsAdmin() = %v, want %v", got, tt.want)
@@ -444,7 +444,7 @@ func TestPostgres_IsAdminsInitialized(t *testing.T) {
 		{
 			name: "IsAdminsInitialized true",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -455,7 +455,7 @@ func TestPostgres_IsAdminsInitialized(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.IsAdminsInitialized(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
@@ -487,7 +487,7 @@ func TestPostgres_IsRegisteredUser(t *testing.T) {
 		{
 			name: "IsRegisteredUser true",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -498,7 +498,7 @@ func TestPostgres_IsRegisteredUser(t *testing.T) {
 		{
 			name: "IsRegisteredUser false",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -510,7 +510,7 @@ func TestPostgres_IsRegisteredUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.IsRegisteredUser(tt.args.ctx, tt.args.id)
 			if (err != nil) != tt.wantErr {
@@ -543,7 +543,7 @@ func TestPostgres_IsUserInRole(t *testing.T) {
 		{
 			name: "IsUserInRole true",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx:  context.Background(),
@@ -555,7 +555,7 @@ func TestPostgres_IsUserInRole(t *testing.T) {
 		{
 			name: "IsUserInRole false",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx:  context.Background(),
@@ -568,7 +568,7 @@ func TestPostgres_IsUserInRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.IsUserInRole(tt.args.ctx, tt.args.id, tt.args.role)
 			if (err != nil) != tt.wantErr {
@@ -600,7 +600,7 @@ func TestPostgres_IsUserPresent(t *testing.T) {
 		{
 			name: "IsUserPresent true",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -611,7 +611,7 @@ func TestPostgres_IsUserPresent(t *testing.T) {
 		{
 			name: "IsUserPresent false",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -623,7 +623,7 @@ func TestPostgres_IsUserPresent(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.IsUserPresent(tt.args.ctx, tt.args.id)
 			if (err != nil) != tt.wantErr {
@@ -655,7 +655,7 @@ func TestPostgres_IsWaitingApprove(t *testing.T) {
 		{
 			name: "IsWaitingApprove true",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -666,7 +666,7 @@ func TestPostgres_IsWaitingApprove(t *testing.T) {
 		{
 			name: "IsWaitingApprove false",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -678,7 +678,7 @@ func TestPostgres_IsWaitingApprove(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			got, err := p.IsWaitingApprove(tt.args.ctx, tt.args.id)
 			if (err != nil) != tt.wantErr {
@@ -710,7 +710,7 @@ func TestPostgres_UpdateUserRole(t *testing.T) {
 		{
 			name: "UpdateUserRole success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -727,7 +727,7 @@ func TestPostgres_UpdateUserRole(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			if err := p.UpdateUserRole(tt.args.ctx, tt.args.user, tt.args.role); (err != nil) != tt.wantErr {
 				t.Errorf("UpdateUserRole() error = %v, wantErr %v", err, tt.wantErr)
@@ -753,7 +753,7 @@ func TestPostgres_RemoveLLM(t *testing.T) {
 		{
 			name: "RemoveLLM success",
 			fields: fields{
-				DB: TestDB.DB,
+				DB: TestDB.db,
 			},
 			args: args{
 				ctx: context.Background(),
@@ -767,7 +767,7 @@ func TestPostgres_RemoveLLM(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Postgres{
-				DB: tt.fields.DB,
+				db: tt.fields.DB,
 			}
 			if err := p.RemoveLLM(tt.args.ctx, tt.args.llm); (err != nil) != tt.wantErr {
 				t.Errorf("RemoveLLM() error = %v, wantErr %v", err, tt.wantErr)
