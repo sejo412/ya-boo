@@ -7,8 +7,11 @@ COPY . .
 RUN go mod tidy && \
     CGO_ENABLED=0 go build -o /ya-boo
 
-FROM gcr.io/distroless/static-debian12
+FROM gcr.io/distroless/static-debian12 as ya-boo
 
-COPY --from=builder /ya-boo /
+COPY --from=builder /ya-boo /app/
+COPY config.yaml /app/
+COPY db /app/db/ 
+WORKDIR /app
 
-CMD ["/ya-boo", "run"]
+CMD ["/app/ya-boo", "run"]

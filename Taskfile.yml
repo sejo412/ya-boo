@@ -17,3 +17,13 @@ tasks:
   statictest:
     cmds:
       - go vet -vettool=$(which statictest) ./...
+  up:
+    vars:
+      ENGINE: $(which docker || which podman)
+    cmds:
+      - eval {{.ENGINE}} compose up -d
+  down:
+    vars:
+      ENGINE: $(which docker || which podman)
+    cmds:
+      - eval {{.ENGINE}} compose down
