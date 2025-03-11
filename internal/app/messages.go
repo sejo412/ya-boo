@@ -3,11 +3,11 @@ package app
 const (
 	MessageInit string = `
 Bot in *INIT* mode.
-Type /init <secret> to initialize the bot with first admin:
-*ID*: %d
-*Username*: %s
-*First name*: %s
-*Last name*: %s
+Type /init <secret\> to initialize the bot with first admin:
+_ID_: %d
+_Username_: %s
+_First name_: %s
+_Last name_: %s
 `
 	MessageInitOk string = `
 Bot initialized successfully.
@@ -16,9 +16,10 @@ Switch to normal mode.
 	MessageHelper string = `
 LLM not chosen
 use:
-*/llmlist* - list available llm
-*/llmuse*  - use llm by id
+/llmlist - list available llm
+/llmuse  - use llm by id
 `
+	MessageLLMAddUsage       string = `use _/llmadd_ name\=<name\> endpoint\=<endpoint\> \[token\=<token\>\] \[desc\=<desc\>\]`
 	MessageErrorCheckAdmin   string = "error checking admin role"
 	MessageErrorCheckUser    string = "error checking user"
 	MessageErrorApproveUser  string = "error approving user"
@@ -34,10 +35,9 @@ use:
 	MessageSuccessLLMAdd     string = "llm successfully added"
 	MessageSuccessLLMRemove  string = "llm successfully removed"
 	MessageSuccessLLMUse     string = "llm switch success"
-	MessageLLMAddUsage       string = "use */llmadd* name=<name> endpoint=<endpoint> [token=<token>] [desc=<desc>]"
 	MessageLLMInternalError  string = "internal error with llm"
-	MessageUnknownCommand    string = "unknown command"
-	MessageBadInitSecret     string = "bad init secret"
+	MessageUnknownCommand    string = "_unknown command_"
+	MessageBadInitSecret     string = "_bad init secret_"
 	MessageNotAuthorized     string = "you are not authorized to use this command"
 	MessageUserNotRegistered string = "user not registered"
 )

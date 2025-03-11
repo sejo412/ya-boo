@@ -12,7 +12,7 @@ lint:
 
 .PHONY: statictest
 statictest:
-	go vet -vettool=$(which statictest) ./...
+	go vet -vettool=$$(which statictest) ./...
 
 .PHONY: up
 up:

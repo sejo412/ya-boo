@@ -58,13 +58,16 @@ func (a *App) initHandler(ctx context.Context, b *bot.Bot, update *models.Update
 				initSuccess = true
 			}
 		default:
-			resp = MessageUnknownCommand + "or" + MessageBadInitSecret
-			resp += fmt.Sprintf(MessageInit, update.Message.From.ID, update.Message.From.Username,
-				update.Message.From.FirstName, update.Message.From.LastName)
+			resp = MessageUnknownCommand + " or " + MessageBadInitSecret
+			resp += fmt.Sprintf(MessageInit,
+				update.Message.From.ID,
+				bot.EscapeMarkdownUnescaped(update.Message.From.Username),
+				bot.EscapeMarkdownUnescaped(update.Message.From.FirstName),
+				bot.EscapeMarkdownUnescaped(update.Message.From.LastName))
 		}
 		_, err = b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
-			Text:      bot.EscapeMarkdown(resp),
+			Text:      resp,
 			ParseMode: models.ParseModeMarkdown,
 		})
 		if err != nil {
@@ -226,7 +229,7 @@ func (a *App) checkUser(next bot.HandlerFunc) bot.HandlerFunc {
 func sendResponseFromCommand(ctx context.Context, b *bot.Bot, update *models.Update, text string) {
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:    update.Message.Chat.ID,
-		Text:      bot.EscapeMarkdown(text),
+		Text:      text,
 		ParseMode: models.ParseModeMarkdown,
 	})
 	if err != nil {
