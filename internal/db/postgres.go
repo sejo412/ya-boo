@@ -153,7 +153,7 @@ func (p *Postgres) ListUsers(ctx context.Context) ([]m.User, error) {
 func (p *Postgres) GetLLMs(ctx context.Context) ([]m.LLM, error) {
 	result := make([]m.LLM, 0)
 	rows, err := p.db.QueryContext(ctx,
-		"SELECT * FROM llm ORDER BY id DESC")
+		"SELECT * FROM llm ORDER BY id")
 	if err != nil {
 		log.Printf("failed to make query: %v", err)
 		return nil, fmt.Errorf("failed to make query: %w", err)

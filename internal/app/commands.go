@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/go-telegram/bot"
 	"github.com/sejo412/ya-boo/pkg/models"
 )
 
@@ -80,20 +80,21 @@ func cmdInitFirstAdmin(ctx context.Context, storage Storage, user models.User) e
 }
 
 func cmdListUsers(ctx context.Context, storage Storage) string {
-	t := table.NewWriter()
-	t.AppendHeader(table.Row{"ID", "Username", "FirstName", "LastName", "Group"})
-	result := "|----|----------|-----------|----------|-------|\n"
-	result += "| ID | Username | FirstName | LastName | Group |\n"
-	result += "|----|----------|-----------|----------|-------|\n"
 	users, err := storage.ListUsers(ctx)
 	if err != nil {
 		return fmt.Sprintf("error list users: %v", err)
 	}
+	resp := "```\nID\tUsername\tFirstName\tLastName\tRole\n"
 	for _, user := range users {
-		result += fmt.Sprintf("| %d | %s | %s | %s | %s |\n",
-			user.ID, user.Username, user.FirstName, user.LastName, user.Role)
+		resp += fmt.Sprintf("%d\t%s\t%s\t%s\t%s\n",
+			user.ID,
+			user.Username,
+			user.FirstName,
+			user.LastName,
+			user.Role)
 	}
-	return result
+	resp += "```"
+	return resp
 }
 
 func cmdApproveUser(ctx context.Context, storage Storage, user models.User) string {
@@ -131,12 +132,14 @@ func cmdLlmList(ctx context.Context, storage Storage) string {
 	if err != nil {
 		return MessageErrorGetLLMs
 	}
-	result := "|----|------|-------------|\n"
-	result += "| ID | Name | Description |\n"
-	result += "|----|------|-------------|\n"
+	result := "```\nID\tName\tDescription\n"
 	for _, llm := range llmList {
-		result += fmt.Sprintf("| %d | %s | %s |\n", llm.ID, llm.Name, llm.Description)
+		result += fmt.Sprintf("%d\t%s\t%s\n",
+			llm.ID,
+			bot.EscapeMarkdownUnescaped(llm.Name),
+			bot.EscapeMarkdownUnescaped(llm.Description))
 	}
+	result += "```"
 	return result
 }
 
