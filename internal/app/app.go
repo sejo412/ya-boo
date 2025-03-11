@@ -20,7 +20,7 @@ type App struct {
 }
 
 type AiClient interface {
-	ChatCompletion(ctx context.Context, req string) (resp string, err error)
+	ChatCompletion(ctx context.Context, model, req string) (resp string, err error)
 }
 
 type Storage interface {

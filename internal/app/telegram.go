@@ -86,7 +86,7 @@ func (a *App) defaultHandler(ctx context.Context, b *bot.Bot, update *models.Upd
 		if err != nil || llm.ID == 0 {
 			resp = MessageHelper
 		} else {
-			resp, err = a.aiClients[llm.ID].ChatCompletion(ctx, update.Message.Text)
+			resp, err = a.aiClients[llm.ID].ChatCompletion(ctx, llm.Name, update.Message.Text)
 			if err != nil {
 				log.Printf("error completing message: %v", err)
 				resp = MessageLLMInternalError

@@ -18,13 +18,15 @@ func NewClient(endpoint, token string) *Client {
 	}
 }
 
-func (c *Client) ChatCompletion(ctx context.Context, req string) (resp string, err error) {
-	completion, err := c.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
+func (c *Client) ChatCompletion(ctx context.Context, model, req string) (resp string, err error) {
+	p := openai.ChatCompletionNewParams{
 		Messages: openai.F([]openai.ChatCompletionMessageParamUnion{
 			openai.UserMessage(req),
 		}),
-		Seed: openai.Int(1),
-	})
+		Seed:  openai.Int(1),
+		Model: openai.F(model),
+	}
+	completion, err := c.Chat.Completions.New(ctx, p)
 	if err != nil {
 		return "", err
 	}

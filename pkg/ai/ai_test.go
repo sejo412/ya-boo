@@ -12,7 +12,7 @@ const haiku = `Солнце зашумело,
 
 type ClientStub struct{}
 
-func (c *ClientStub) ChatCompletion(ctx context.Context, req string) (resp string, err error) {
+func (c *ClientStub) ChatCompletion(ctx context.Context, model, req string) (resp string, err error) {
 	if req == "error" {
 		return "", errors.New("error")
 	}
@@ -50,7 +50,7 @@ func TestClient_ChatCompletion(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &ClientStub{}
-			gotResp, err := c.ChatCompletion(tt.args.ctx, tt.args.req)
+			gotResp, err := c.ChatCompletion(tt.args.ctx, "local", tt.args.req)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ChatCompletion() error = %v, wantErr %v", err, tt.wantErr)
 				return
