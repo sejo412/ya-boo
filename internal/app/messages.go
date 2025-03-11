@@ -19,9 +19,7 @@ use:
 /llmlist - list available llm
 /llmuse  - use llm by id
 `
-	MessageLLMAddUsage string = `
-use _/llmadd_ name\=<name\> endpoint\=<endpoint\> \[token\=<token\>\] \[desc\=<desc\>\]
-`
+	MessageLLMAddUsage       string = `use _/llmadd_ name\=<name\> endpoint\=<endpoint\> \[token\=<token\>\] \[desc\=<desc\>\]`
 	MessageErrorCheckAdmin   string = "error checking admin role"
 	MessageErrorCheckUser    string = "error checking user"
 	MessageErrorApproveUser  string = "error approving user"

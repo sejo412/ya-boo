@@ -177,7 +177,7 @@ func parseLLM(message string) (llm models.LLM, err error) {
 	for _, v := range splited {
 		param := strings.Split(v, "=")
 		if len(param) != 2 {
-			return models.LLM{}, fmt.Errorf(MessageLLMAddUsage)
+			return models.LLM{}, errors.New(MessageLLMAddUsage)
 		}
 		vParam := strings.Split(v, "=")[0]
 		vValue := strings.Split(v, "=")[1]
