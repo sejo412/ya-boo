@@ -61,6 +61,7 @@ func (a *App) initHandler(ctx context.Context, b *bot.Bot, update *models.Update
 			resp = MessageUnknownCommand + " or " + MessageBadInitSecret
 			resp += fmt.Sprintf(MessageInit,
 				update.Message.From.ID,
+				bot.EscapeMarkdownUnescaped(update.Message.From.Username),
 				bot.EscapeMarkdownUnescaped(update.Message.From.FirstName),
 				bot.EscapeMarkdownUnescaped(update.Message.From.LastName))
 		}
