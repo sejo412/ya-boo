@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/sejo412/ya-boo/pkg/models"
 )
 
@@ -79,6 +80,8 @@ func cmdInitFirstAdmin(ctx context.Context, storage Storage, user models.User) e
 }
 
 func cmdListUsers(ctx context.Context, storage Storage) string {
+	t := table.NewWriter()
+	t.AppendHeader(table.Row{"ID", "Username", "FirstName", "LastName", "Group"})
 	result := "|----|----------|-----------|----------|-------|\n"
 	result += "| ID | Username | FirstName | LastName | Group |\n"
 	result += "|----|----------|-----------|----------|-------|\n"
@@ -169,6 +172,10 @@ func cmdLlmRemove(ctx context.Context, storage Storage, id int64) string {
 func parseLLM(message string) (llm models.LLM, err error) {
 	splited := strings.Split(message, " ")[1:]
 	for _, v := range splited {
+		param := strings.Split(v, "=")
+		if len(param) != 2 {
+			return models.LLM{}, fmt.Errorf(MessageLLMAddUsage)
+		}
 		vParam := strings.Split(v, "=")[0]
 		vValue := strings.Split(v, "=")[1]
 		switch vParam {
